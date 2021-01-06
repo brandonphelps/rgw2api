@@ -1,0 +1,22 @@
+name: rust_fmt
+
+on:
+  pull_request:
+# make sure master and develop are squeky clean.
+    - master
+    - develop 
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install rustfmt
+      run: rustup component add rustfmt
+    - uses: actions/checkout@v2
+    - name: Format Check
+      run: cargo fmt -- --check
