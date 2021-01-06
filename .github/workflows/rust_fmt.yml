@@ -1,10 +1,9 @@
 name: rust_fmt
 
+# make sure master and develop are squeky clean.
 on:
   pull_request:
-# make sure master and develop are squeky clean.
-    - master
-    - develop 
+    branches: [master, develop]
 
 env:
   CARGO_TERM_COLOR: always
