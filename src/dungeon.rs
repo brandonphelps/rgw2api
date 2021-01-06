@@ -1,6 +1,9 @@
 mod info;
 use info::{DungeonInfo, PathInfo, Rewards, DUNGEONS};
 
+mod user;
+pub use user::UserProgress;
+
 /// Information about a dungeon.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Dungeon {
