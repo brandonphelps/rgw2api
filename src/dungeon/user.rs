@@ -1,17 +1,60 @@
 use super::Path;
 use std::collections::HashSet;
 
+extern crate serde_derive;
+use serde_derive::Deserialize;
+
 /// Tracks what dungeons a user has ran since the last daily reset
 /// and from the last Dungeon Frequenter achievement completion.
+#[derive(Debug, Clone)]
 pub struct UserProgress {
     dungeon_frequenter_progress: HashSet<u8>,
     dungeons_ran_today: HashSet<String>,
 }
 
+#[derive(Deserialize)]
+struct AchievementProgress {
+    id: u32,
+    bits: Option<Vec<u8>>,
+}
+
+const DUNGEON_FREQUENTER_ID: u32 = 2963;
+
 impl UserProgress {
     /// Fetches a user's dungeon progress from the GW2 API.
-    pub fn from_api_key(_key: &str) -> Self {
-        todo!()
+    /// The API key requires the progression permission.
+    pub fn from_api_key(key: &str) -> reqwest::Result<Self> {
+        let mut new = Self {
+            dungeon_frequenter_progress: Default::default(),
+            dungeons_ran_today: Default::default(),
+        };
+
+        // fetch the user's achievement progress to update the Dungeon Frequenter progress
+        // note: gets {"text": "requires scope progression"} on permission error with 403 error.
+        // could improve this error message in this case, currently gets a deserialization error.
+        let achievement_progress: Vec<AchievementProgress> = reqwest::blocking::Client::new()
+            .get("https://api.guildwars2.com/v2/account/achievements")
+            .header("Authorization", "Bearer ".to_owned() + key)
+            .send()?
+            .json()?;
+        for progress in achievement_progress {
+            if progress.id == DUNGEON_FREQUENTER_ID {
+                if let Some(bits) = progress.bits {
+                    new.dungeon_frequenter_progress.extend(bits.into_iter());
+                }
+            }
+        }
+
+        // fetch the dungeons that have been ran today
+        let dungeons_ran_today: Vec<String> = reqwest::blocking::Client::new()
+            .get("https://api.guildwars2.com/v2/account/dungeons")
+            .header("Authorization", "Bearer ".to_owned() + key)
+            .send()?
+            .json()?;
+        new.dungeons_ran_today
+            .extend(dungeons_ran_today.into_iter());
+
+        Ok(new)
     }
 
     /// Modifies a player info as if the player ran a dungeon path.
