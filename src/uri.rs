@@ -52,6 +52,6 @@ mod test {
         let p = EndPoint::items(ItemId(3));
         assert_eq!(p.uri(), "items/3");
         let k = EndPoint::items(ItemId(1000));
-        assert_eq!(p.uri(), "items/1000");
+        assert_eq!(k.uri(), "items/1000");
     }
 }
