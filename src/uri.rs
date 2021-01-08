@@ -44,16 +44,14 @@ impl EndPoint {
     }
 }
 
-pub fn function() -> String {
-    return "hello".to_string();
-}
-
 pub struct Requester {
     version: ApiVersion,
     pub base_uri: String,
+    // todo: add in auth key thing
 }
 
 impl Requester {
+    // todo: add in auth key as input parameter. 
     pub fn new(version: ApiVersion) -> Requester {
         let mut uri_str = String::new();
         uri_str += "https://api.guildwars2.com/v";
