@@ -1,4 +1,4 @@
-//! Contains information about dungeons that are not avaliable from the GW2 API.
+//! Contains information about dungeons that are not available from the GW2 API.
 //! This information would have to be updated if dungeon rewards are reworked
 //! or if more dungeons are added.
 //!
@@ -34,6 +34,8 @@ pub struct PathInfo {
     pub long_name: &'static str,
     /// The index inserted into the bits array for the dungeon
     /// frequenter achievement when this path is done.
+    /// Is optional because some dungeons do not give dungeon
+    /// frequenter progress (currently only Arah story does not).
     pub dungeon_frequenter_index: Option<u8>,
     /// The rewards for doing this path
     pub rewards: Rewards,
@@ -158,6 +160,8 @@ static SE_PATHS: [PathInfo; 4] = [
         rewards: Rewards::Explorable { bonus_coins: 35_00 },
     },
     PathInfo {
+        // NOTE: The id is misspelled in the GW2 API.
+        // The spelling difference between the id and long_name is intentional.
         id: "rasalov",
         short_name: "p2",
         long_name: "Rasolov (p2)",

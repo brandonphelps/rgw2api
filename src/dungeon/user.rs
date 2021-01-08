@@ -18,6 +18,7 @@ struct AchievementProgress {
     bits: Option<Vec<u8>>,
 }
 
+/// The achievement id of the Dungeon Frequenter achievement.
 const DUNGEON_FREQUENTER_ID: u32 = 2963;
 
 impl UserProgress {
