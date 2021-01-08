@@ -3,11 +3,12 @@
 // should be usize?
 
 // todo: move this to some types thing?
-struct ItemId(u128);
-struct RecipeId(u128);
+pub struct ItemId(pub u128);
+pub struct RecipeId(pub u128);
+pub struct ApiVersion(pub u8);
 
 #[allow(non_camel_case_types)]
-enum EndPoint {
+pub enum EndPoint {
     account_materials,
     account_bank,
     items(ItemId),
@@ -32,13 +33,42 @@ impl EndPoint {
             EndPoint::build => false,
         }
     }
-    pub fn uri(self) -> String {
+
+    pub fn uri(&self) -> String {
         match self {
             EndPoint::account_materials => "account/materials".to_string(),
             EndPoint::account_bank => "account/bank".to_string(),
             EndPoint::items(id) => format!("items/{}", id.0.to_string()),
             _ => unreachable!(),
         }
+    }
+}
+
+pub fn function() -> String {
+    return "hello".to_string();
+}
+
+pub struct Requester {
+    version: ApiVersion,
+    pub base_uri: String,
+}
+
+impl Requester {
+    pub fn new(version: ApiVersion) -> Requester {
+        let mut uri_str = String::new();
+        uri_str += "https://api.guildwars2.com/v";
+        uri_str += &version.0.to_string();
+        return Requester {
+            version: version,
+            base_uri: uri_str,
+        };
+    }
+
+    pub fn build_uri(&self, end_point: &EndPoint) -> String {
+        let mut new_uri = self.base_uri.clone();
+        new_uri.push_str("/");
+        new_uri.push_str(&end_point.uri().clone());
+        return new_uri;
     }
 }
 
@@ -53,5 +83,12 @@ mod test {
         assert_eq!(p.uri(), "items/3");
         let k = EndPoint::items(ItemId(1000));
         assert_eq!(k.uri(), "items/1000");
+    }
+
+    #[test]
+    fn uri_building() {
+        let r = Requester::new(ApiVersion(2));
+        let result = r.build_uri(&EndPoint::account_bank);
+        assert_eq!(result, "https://api.guildwars2.com/v2/account/bank");
     }
 }
