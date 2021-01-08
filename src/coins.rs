@@ -19,8 +19,8 @@ impl Coins {
     }
 
     /// Creates an amount of currency from a number of gold coins.
-    pub fn from_gold(gold: impl Into<i32>) -> Self {
-        Coins(gold.into() * 1_00_00)
+    pub const fn from_gold(gold: i32) -> Self {
+        Coins(gold * 1_00_00)
     }
 
     /// The number of silver coins.
@@ -29,8 +29,8 @@ impl Coins {
     }
 
     /// Creates an amount of currency from a number of silver coins.
-    pub fn from_silver(silver: impl Into<i32>) -> Self {
-        Coins(silver.into() * 1_00)
+    pub const fn from_silver(silver: i32) -> Self {
+        Coins(silver * 1_00)
     }
 
     /// The number of copper coins.
@@ -39,8 +39,8 @@ impl Coins {
     }
 
     /// Creates an amount of currency from a number of copper coins.
-    pub fn from_copper(copper: impl Into<i32>) -> Self {
-        Coins(copper.into())
+    pub const fn from_copper(copper: i32) -> Self {
+        Coins(copper)
     }
 }
 
