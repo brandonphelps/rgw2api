@@ -1,3 +1,6 @@
+extern crate derive_more;
+use derive_more::Add;
+
 /// Represents a monetary amount.
 ///
 /// The inner value is the total number of copper coins.
@@ -6,7 +9,7 @@
 /// one silver coin and every 100 silver coins is one gold coin.
 ///
 /// The Display trait uses this in game format.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Add)]
 pub struct Coins(i32);
 
 impl Coins {
