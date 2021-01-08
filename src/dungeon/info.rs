@@ -5,6 +5,8 @@
 //! TODO: The amount of gold rewards are known for some story paths.
 //!       The missing story paths are currently using 0.
 
+use crate::Coins;
+
 /// Information about a dungeon.
 #[derive(Debug, PartialEq, Eq)]
 pub struct DungeonInfo {
@@ -45,10 +47,10 @@ pub struct PathInfo {
 #[derive(Debug, PartialEq, Eq)]
 pub enum Rewards {
     /// Story mission.  No token rewards.  Fixed coin reward.
-    Story { coins: u32 },
+    Story { coins: Coins },
     /// Explorable path.  100 tokens on first per day, 20 on repeat.
     /// bonus_coins + 26s on first per day.  26s on repeat.
-    Explorable { bonus_coins: u32 },
+    Explorable { bonus_coins: Coins },
 }
 
 static AC_PATHS: [PathInfo; 4] = [
@@ -57,28 +59,36 @@ static AC_PATHS: [PathInfo; 4] = [
         short_name: "story",
         long_name: "Story",
         dungeon_frequenter_index: Some(4),
-        rewards: Rewards::Story { coins: 13_00 },
+        rewards: Rewards::Story {
+            coins: Coins::from_silver(13),
+        },
     },
     PathInfo {
         id: "hodgins",
         short_name: "p1",
         long_name: "Hodgins (p1)",
         dungeon_frequenter_index: Some(5),
-        rewards: Rewards::Explorable { bonus_coins: 50_00 },
+        rewards: Rewards::Explorable {
+            bonus_coins: Coins::from_silver(50),
+        },
     },
     PathInfo {
         id: "detha",
         short_name: "p2",
         long_name: "Detha (p2)",
         dungeon_frequenter_index: Some(6),
-        rewards: Rewards::Explorable { bonus_coins: 50_00 },
+        rewards: Rewards::Explorable {
+            bonus_coins: Coins::from_silver(50),
+        },
     },
     PathInfo {
         id: "tzark",
         short_name: "p3",
         long_name: "Tzark (p3)",
         dungeon_frequenter_index: Some(7),
-        rewards: Rewards::Explorable { bonus_coins: 50_00 },
+        rewards: Rewards::Explorable {
+            bonus_coins: Coins::from_silver(50),
+        },
     },
 ];
 
@@ -88,28 +98,36 @@ static CM_PATHS: [PathInfo; 4] = [
         short_name: "story",
         long_name: "Story",
         dungeon_frequenter_index: Some(12),
-        rewards: Rewards::Story { coins: 0 },
+        rewards: Rewards::Story {
+            coins: Coins::from_silver(0),
+        },
     },
     PathInfo {
         id: "asura",
         short_name: "p1",
         long_name: "Asura (p1)",
         dungeon_frequenter_index: Some(13),
-        rewards: Rewards::Explorable { bonus_coins: 35_00 },
+        rewards: Rewards::Explorable {
+            bonus_coins: Coins::from_silver(35),
+        },
     },
     PathInfo {
         id: "seraph",
         short_name: "p2",
         long_name: "Seraph (p2)",
         dungeon_frequenter_index: Some(14),
-        rewards: Rewards::Explorable { bonus_coins: 35_00 },
+        rewards: Rewards::Explorable {
+            bonus_coins: Coins::from_silver(35),
+        },
     },
     PathInfo {
         id: "butler",
         short_name: "p3",
         long_name: "Butler (p3)",
         dungeon_frequenter_index: Some(15),
-        rewards: Rewards::Explorable { bonus_coins: 35_00 },
+        rewards: Rewards::Explorable {
+            bonus_coins: Coins::from_silver(35),
+        },
     },
 ];
 
@@ -119,28 +137,36 @@ static TA_PATHS: [PathInfo; 4] = [
         short_name: "story",
         long_name: "Story",
         dungeon_frequenter_index: Some(20),
-        rewards: Rewards::Story { coins: 0 },
+        rewards: Rewards::Story {
+            coins: Coins::from_silver(0),
+        },
     },
     PathInfo {
         id: "leurent",
         short_name: "up",
         long_name: "Leurent (Up)",
         dungeon_frequenter_index: Some(21),
-        rewards: Rewards::Explorable { bonus_coins: 35_00 },
+        rewards: Rewards::Explorable {
+            bonus_coins: Coins::from_silver(35),
+        },
     },
     PathInfo {
         id: "vevina",
         short_name: "forward",
         long_name: "Vevina (Forward)",
         dungeon_frequenter_index: Some(22),
-        rewards: Rewards::Explorable { bonus_coins: 35_00 },
+        rewards: Rewards::Explorable {
+            bonus_coins: Coins::from_silver(35),
+        },
     },
     PathInfo {
         id: "aetherpath",
         short_name: "aetherpath",
         long_name: "Aetherpath",
         dungeon_frequenter_index: Some(23),
-        rewards: Rewards::Explorable { bonus_coins: 66_00 },
+        rewards: Rewards::Explorable {
+            bonus_coins: Coins::from_silver(66),
+        },
     },
 ];
 
@@ -150,14 +176,18 @@ static SE_PATHS: [PathInfo; 4] = [
         short_name: "story",
         long_name: "Story",
         dungeon_frequenter_index: Some(16),
-        rewards: Rewards::Story { coins: 0 },
+        rewards: Rewards::Story {
+            coins: Coins::from_silver(0),
+        },
     },
     PathInfo {
         id: "fergg",
         short_name: "p1",
         long_name: "Fergg (p1)",
         dungeon_frequenter_index: Some(17),
-        rewards: Rewards::Explorable { bonus_coins: 35_00 },
+        rewards: Rewards::Explorable {
+            bonus_coins: Coins::from_silver(35),
+        },
     },
     PathInfo {
         // NOTE: The id is misspelled in the GW2 API.
@@ -166,14 +196,18 @@ static SE_PATHS: [PathInfo; 4] = [
         short_name: "p2",
         long_name: "Rasolov (p2)",
         dungeon_frequenter_index: Some(18),
-        rewards: Rewards::Explorable { bonus_coins: 35_00 },
+        rewards: Rewards::Explorable {
+            bonus_coins: Coins::from_silver(35),
+        },
     },
     PathInfo {
         id: "koptev",
         short_name: "p3",
         long_name: "Koptev (p3)",
         dungeon_frequenter_index: Some(19),
-        rewards: Rewards::Explorable { bonus_coins: 35_00 },
+        rewards: Rewards::Explorable {
+            bonus_coins: Coins::from_silver(35),
+        },
     },
 ];
 
@@ -183,28 +217,36 @@ static COF_PATHS: [PathInfo; 4] = [
         short_name: "story",
         long_name: "Story",
         dungeon_frequenter_index: Some(28),
-        rewards: Rewards::Story { coins: 0 },
+        rewards: Rewards::Story {
+            coins: Coins::from_silver(0),
+        },
     },
     PathInfo {
         id: "ferrah",
         short_name: "p1",
         long_name: "Ferrah (p1)",
         dungeon_frequenter_index: Some(29),
-        rewards: Rewards::Explorable { bonus_coins: 35_00 },
+        rewards: Rewards::Explorable {
+            bonus_coins: Coins::from_silver(35),
+        },
     },
     PathInfo {
         id: "magg",
         short_name: "p2",
         long_name: "Magg (p2)",
         dungeon_frequenter_index: Some(30),
-        rewards: Rewards::Explorable { bonus_coins: 35_00 },
+        rewards: Rewards::Explorable {
+            bonus_coins: Coins::from_silver(35),
+        },
     },
     PathInfo {
         id: "rhiannon",
         short_name: "p3",
         long_name: "Rhiannon (p3)",
         dungeon_frequenter_index: Some(31),
-        rewards: Rewards::Explorable { bonus_coins: 35_00 },
+        rewards: Rewards::Explorable {
+            bonus_coins: Coins::from_silver(35),
+        },
     },
 ];
 
@@ -214,28 +256,36 @@ static HOTW_PATHS: [PathInfo; 4] = [
         short_name: "story",
         long_name: "Story",
         dungeon_frequenter_index: Some(24),
-        rewards: Rewards::Story { coins: 0 },
+        rewards: Rewards::Story {
+            coins: Coins::from_silver(0),
+        },
     },
     PathInfo {
         id: "butcher",
         short_name: "p1",
         long_name: "Butcher (p1)",
         dungeon_frequenter_index: Some(25),
-        rewards: Rewards::Explorable { bonus_coins: 35_00 },
+        rewards: Rewards::Explorable {
+            bonus_coins: Coins::from_silver(35),
+        },
     },
     PathInfo {
         id: "plunderer",
         short_name: "p2",
         long_name: "Plunderer (p2)",
         dungeon_frequenter_index: Some(26),
-        rewards: Rewards::Explorable { bonus_coins: 35_00 },
+        rewards: Rewards::Explorable {
+            bonus_coins: Coins::from_silver(35),
+        },
     },
     PathInfo {
         id: "zealot",
         short_name: "p3",
         long_name: "Zealot (p3)",
         dungeon_frequenter_index: Some(27),
-        rewards: Rewards::Explorable { bonus_coins: 35_00 },
+        rewards: Rewards::Explorable {
+            bonus_coins: Coins::from_silver(35),
+        },
     },
 ];
 
@@ -245,28 +295,36 @@ static COE_PATHS: [PathInfo; 4] = [
         short_name: "story",
         long_name: "Story",
         dungeon_frequenter_index: Some(0),
-        rewards: Rewards::Story { coins: 0 },
+        rewards: Rewards::Story {
+            coins: Coins::from_silver(0),
+        },
     },
     PathInfo {
         id: "submarine",
         short_name: "p1",
         long_name: "Submarine (p1)",
         dungeon_frequenter_index: Some(1),
-        rewards: Rewards::Explorable { bonus_coins: 35_00 },
+        rewards: Rewards::Explorable {
+            bonus_coins: Coins::from_silver(35),
+        },
     },
     PathInfo {
         id: "teleporter",
         short_name: "p2",
         long_name: "Teleporter (p2)",
         dungeon_frequenter_index: Some(2),
-        rewards: Rewards::Explorable { bonus_coins: 35_00 },
+        rewards: Rewards::Explorable {
+            bonus_coins: Coins::from_silver(35),
+        },
     },
     PathInfo {
         id: "front_door",
         short_name: "p3",
         long_name: "Front Door (p3)",
         dungeon_frequenter_index: Some(3),
-        rewards: Rewards::Explorable { bonus_coins: 35_00 },
+        rewards: Rewards::Explorable {
+            bonus_coins: Coins::from_silver(35),
+        },
     },
 ];
 
@@ -276,7 +334,9 @@ static ARAH_PATHS: [PathInfo; 5] = [
         short_name: "story",
         long_name: "Story",
         dungeon_frequenter_index: None,
-        rewards: Rewards::Story { coins: 0 },
+        rewards: Rewards::Story {
+            coins: Coins::from_silver(0),
+        },
     },
     PathInfo {
         id: "jotun",
@@ -284,7 +344,7 @@ static ARAH_PATHS: [PathInfo; 5] = [
         long_name: "Jotun (p1)",
         dungeon_frequenter_index: Some(8),
         rewards: Rewards::Explorable {
-            bonus_coins: 1_80_00,
+            bonus_coins: Coins::from_silver(180),
         },
     },
     PathInfo {
@@ -293,7 +353,7 @@ static ARAH_PATHS: [PathInfo; 5] = [
         long_name: "Mursaat (p2)",
         dungeon_frequenter_index: Some(9),
         rewards: Rewards::Explorable {
-            bonus_coins: 1_05_00,
+            bonus_coins: Coins::from_silver(105),
         },
     },
     PathInfo {
@@ -301,7 +361,9 @@ static ARAH_PATHS: [PathInfo; 5] = [
         short_name: "p3",
         long_name: "Forgotten (p3)",
         dungeon_frequenter_index: Some(10),
-        rewards: Rewards::Explorable { bonus_coins: 50_00 },
+        rewards: Rewards::Explorable {
+            bonus_coins: Coins::from_silver(50),
+        },
     },
     PathInfo {
         id: "seer",
@@ -309,7 +371,7 @@ static ARAH_PATHS: [PathInfo; 5] = [
         long_name: "Seer (p4)",
         dungeon_frequenter_index: Some(11),
         rewards: Rewards::Explorable {
-            bonus_coins: 1_80_00,
+            bonus_coins: Coins::from_silver(180),
         },
     },
 ];

@@ -4,6 +4,8 @@ use info::{DungeonInfo, PathInfo, Rewards, DUNGEONS};
 mod user;
 pub use user::UserProgress;
 
+use crate::Coins;
+
 /// Information about a dungeon.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Dungeon {
@@ -110,18 +112,18 @@ impl Path {
 
     /// The number of coins gotten by doing this dungeon path the first
     /// time in a day.
-    pub fn coins(&self) -> u32 {
+    pub fn coins(&self) -> Coins {
         match self.info.rewards {
             Rewards::Story { coins } => coins,
-            Rewards::Explorable { bonus_coins } => 26_00 + bonus_coins,
+            Rewards::Explorable { bonus_coins } => Coins::from_silver(26) + bonus_coins,
         }
     }
 
     /// The number of coins gotten by doing this dungeon repeatedly in a day.
-    pub fn repeat_coins(&self) -> u32 {
+    pub fn repeat_coins(&self) -> Coins {
         match self.info.rewards {
             Rewards::Story { coins } => coins,
-            Rewards::Explorable { .. } => 26_00,
+            Rewards::Explorable { .. } => Coins::from_silver(26),
         }
     }
 
@@ -147,7 +149,7 @@ impl Path {
 /// NOTE: Many tests have hard coded constants that must be changed if dungeon rewards
 /// are reworked or more dungeons are added.
 mod test {
-    use super::{Dungeon, Path};
+    use super::*;
 
     #[test]
     fn all_dungeons() {
@@ -180,8 +182,8 @@ mod test {
     fn ac_story_rewards() {
         let path = Path::from_id("ac_story").unwrap();
 
-        assert_eq!(13_00, path.coins());
-        assert_eq!(13_00, path.repeat_coins());
+        assert_eq!(Coins::from_silver(13), path.coins());
+        assert_eq!(Coins::from_silver(13), path.repeat_coins());
 
         assert_eq!(0, path.tokens());
         assert_eq!(0, path.repeat_tokens());
@@ -191,8 +193,11 @@ mod test {
     fn ac_p1_rewards() {
         let path = Path::from_id("hodgins").unwrap();
 
-        assert_eq!(50_00 + 26_00, path.coins());
-        assert_eq!(26_00, path.repeat_coins());
+        assert_eq!(
+            Coins::from_silver(50) + Coins::from_silver(26),
+            path.coins()
+        );
+        assert_eq!(Coins::from_silver(26), path.repeat_coins());
 
         assert_eq!(100, path.tokens());
         assert_eq!(20, path.repeat_tokens());
