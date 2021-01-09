@@ -1,5 +1,38 @@
 #![allow(dead_code)]
 
+
+use reqwest;
+
+use serde_derive::Deserialize;
+
+#[derive(Deserialize, Debug)]
+struct ItemDetails {
+    #[serde(rename = "type")]
+    c_type: String,
+    weight_class: String,
+    defense: u32,
+    // whats the type of infusions slots item? 
+    //infusion_slots:
+    attribute_adjustment: f64,
+    suffix_item_id: u64,
+    secondary_suffix_item_id: Option<u32>,
+}
+
+#[derive(Deserialize, Debug)]
+struct Item {
+    name: String,
+    // maybe should be an option? 
+    description: String,
+    #[serde(rename = "type")]
+    item_type: String,
+    id: u32,
+    level: u32,
+    rarity: String,
+    default_skin: u64,
+    game_types: Vec<String>,
+    flags: Vec<String>,
+}
+
 // should be usize?
 
 // todo: move this to some types thing?
@@ -88,5 +121,23 @@ mod test {
         let r = Requester::new(ApiVersion(2));
         let result = r.build_uri(&EndPoint::account_bank);
         assert_eq!(result, "https://api.guildwars2.com/v2/account/bank");
+
+    }
+
+    #[test]
+    fn uri_query() {
+        let requester = Requester::new(ApiVersion(2));
+	
+
+	let r = reqwest::blocking::Client::new()
+	    .get(&requester.build_uri(&EndPoint::items(ItemId(2000))))
+	    .send().unwrap().text().unwrap();
+	println!("{}", r);
+
+	let k: Item = reqwest::blocking::Client::new()
+	    .get(&requester.build_uri(&EndPoint::items(ItemId(2000))))
+	    .send().unwrap().json().unwrap();
+	println!("{:#?}", k);
+	assert_eq!(1, 2);
     }
 }
