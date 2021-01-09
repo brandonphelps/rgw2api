@@ -5,6 +5,7 @@ use reqwest;
 
 use serde_derive::Deserialize;
 
+// these item structs should be namespaced into the v2 api. 
 #[derive(Deserialize, Debug)]
 struct ItemAttribute {
     attribute: String,
@@ -54,9 +55,12 @@ pub struct ItemId(pub u128);
 pub struct RecipeId(pub u128);
 pub struct ApiVersion(pub u8);
 pub struct ApiKey(pub String);
+pub struct AchievementId(pub u128);
 
 #[allow(non_camel_case_types)]
 pub enum EndPoint {
+    achievements(Option<AchievementId>),
+    achievements_daily,
     account_materials,
     account_bank,
     items(ItemId),
@@ -74,6 +78,8 @@ impl EndPoint {
             EndPoint::account_bank => true,
 
             // don't require auth
+	    EndPoint::achievements(_) => false,
+	    EndPoint::achievements_daily => false,
             EndPoint::items(_) => false,
             EndPoint::item_stats(_) => false,
             EndPoint::item_stats_all => false,
@@ -84,6 +90,12 @@ impl EndPoint {
 
     pub fn uri(&self) -> String {
         match self {
+	    EndPoint::achievements(op_id) => {
+		match op_id {
+		    Some(id) => format!("achievements/{}", id.0.to_string()),
+		    None => format!("achievements"),
+		}
+	    },
             EndPoint::account_materials => "account/materials".to_string(),
             EndPoint::account_bank => "account/bank".to_string(),
             EndPoint::items(id) => format!("items/{}", id.0.to_string()),
@@ -132,6 +144,57 @@ mod test {
         assert_eq!(k.uri(), "items/1000");
     }
 
+    #[test]
+    fn test_uri_achivements() {
+	let p = EndPoint::achievements(None);
+	assert_eq!(p.uri(), "achievements");
+    }
+
+    #[test]
+    fn test_uri_achivement_ids() {
+	let p = EndPoint::achievements(Some(AchievementId(32)));
+	assert_eq!(p.uri(), "achievements/32");
+    }
+
+    #[test]
+    fn test_uri_achive_builder() {
+	// https://wiki.guildwars2.com/wiki/API:2/achievements
+	let p = EndPoint::achievements(Some(AchievementId(32)));
+	let k = EndPoint::achievements(Some(AchievementId(40)));
+
+	// would like to use the data refinement thing here to specify
+	//  a specific varient of the EndPoint enum item at compile time.
+	// it appears to not be implements
+	// https://github.com/rust-lang/rfcs/issues/754
+	// pretty certain order of ids in result do not matter. 
+	fn mock_builder(end_point1: &EndPoint,
+			end_point2: &EndPoint) -> String {
+	    let id_one = match end_point1 {
+		EndPoint::achievements(t) => {
+		    match t {
+			Some(id) => id,
+			None => { panic!("shouldn't get here") },
+		    }
+		},
+		_ => { panic!("shouldn't get here") },
+	    };
+	    let id_two = match end_point2 {
+		EndPoint::achievements(t) => {
+		    match t {
+			Some(id) => id,
+			None => { panic!("shouldn't get here") },
+		    }
+		},
+		_ => { panic!("shouldn't get here") },
+	    };
+	    // should return  "achivements?ids=id_one,id_two"
+	    // specifically fails cause its not implemented yet. 
+	    return "no implemented".to_string();
+	}
+	assert_eq!(mock_builder(&p, &k), "achievements?ids=32,40")
+    }
+
+    
     #[test]
     fn uri_building() {
         let r = Requester::new(ApiVersion(2), None);
