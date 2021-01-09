@@ -6,6 +6,12 @@ use reqwest;
 use serde_derive::Deserialize;
 
 #[derive(Deserialize, Debug)]
+struct ItemAttribute {
+    attribute: String,
+    modifier: u32
+}
+
+#[derive(Deserialize, Debug)]
 struct ItemDetails {
     #[serde(rename = "type")]
     c_type: String,
@@ -13,9 +19,12 @@ struct ItemDetails {
     defense: u32,
     // whats the type of infusions slots item? 
     //infusion_slots:
+    //infix_upgrade : HashMap<String,
+    // infix upgrade is of format { "id" : u32, "attributes" : Vec<ItemAttribute> }
+    // bit un certain how to tell serdea the values are of different types https://github.com/serde-rs/json/issues/144
     attribute_adjustment: f64,
     suffix_item_id: u64,
-    secondary_suffix_item_id: Option<u32>,
+    secondary_suffix_item_id: Option<String>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -31,6 +40,11 @@ struct Item {
     default_skin: u64,
     game_types: Vec<String>,
     flags: Vec<String>,
+    // not certain what the vec type should be. 
+    restrictions: Vec<String>,
+    chat_link: String,
+    icon: String,
+    details: ItemDetails,
 }
 
 // should be usize?
@@ -39,6 +53,7 @@ struct Item {
 pub struct ItemId(pub u128);
 pub struct RecipeId(pub u128);
 pub struct ApiVersion(pub u8);
+pub struct ApiKey(pub String);
 
 #[allow(non_camel_case_types)]
 pub enum EndPoint {
@@ -79,18 +94,19 @@ impl EndPoint {
 
 pub struct Requester {
     version: ApiVersion,
-    pub base_uri: String,
-    // todo: add in auth key thing
+    api_key: Option<ApiKey>,
+    base_uri: String,
 }
 
 impl Requester {
     // todo: add in auth key as input parameter. 
-    pub fn new(version: ApiVersion) -> Requester {
+    pub fn new(version: ApiVersion, api_key: Option<ApiKey>) -> Requester {
         let mut uri_str = String::new();
         uri_str += "https://api.guildwars2.com/v";
         uri_str += &version.0.to_string();
         return Requester {
             version: version,
+	    api_key: api_key,
             base_uri: uri_str,
         };
     }
@@ -118,16 +134,14 @@ mod test {
 
     #[test]
     fn uri_building() {
-        let r = Requester::new(ApiVersion(2));
+        let r = Requester::new(ApiVersion(2), None);
         let result = r.build_uri(&EndPoint::account_bank);
         assert_eq!(result, "https://api.guildwars2.com/v2/account/bank");
-
     }
 
     #[test]
     fn uri_query() {
-        let requester = Requester::new(ApiVersion(2));
-	
+        let requester = Requester::new(ApiVersion(2), None);
 
 	let r = reqwest::blocking::Client::new()
 	    .get(&requester.build_uri(&EndPoint::items(ItemId(2000))))
