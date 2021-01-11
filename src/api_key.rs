@@ -19,7 +19,7 @@ pub struct APIKey {
     /// The account's home server.
     world: String,
     /// What content the account can access.
-    access: Access,
+    access: std::collections::HashSet<String>,
 }
 
 bitflags::bitflags! {
@@ -61,40 +61,6 @@ impl Permission {
             permissions |= Self::from_string(string.as_str());
         }
         permissions
-    }
-}
-
-bitflags::bitflags! {
-    /// The content that an account can access.
-    pub struct Access: u32 {
-        /// Can access content available to everyone.
-        const FREE_TO_PLAY =    0b0001;
-        /// Can access content available to players who bought the base game.
-        const GUILDWARS2 =      0b0010;
-        /// Can access content available to players who bought the heart of thorns expansion.
-        const HEART_OF_THORNS = 0b0100;
-        /// Can access content available to players who bought the path of fire expansion.
-        const PATH_OF_FIRE =    0b1000;
-    }
-}
-
-impl Access {
-    fn from_string(string: &str) -> Self {
-        match string {
-            "PlayForFree" => Self::FREE_TO_PLAY,
-            "GuildWars2" => Self::GUILDWARS2,
-            "HeartOfThorns" => Self::HEART_OF_THORNS,
-            "PathOfFire" => Self::PATH_OF_FIRE,
-            _ => Self::empty(),
-        }
-    }
-
-    fn from_strings(strings: Vec<String>) -> Self {
-        let mut access = Self::empty();
-        for string in strings {
-            access |= Self::from_string(string.as_str());
-        }
-        access
     }
 }
 
@@ -146,7 +112,7 @@ impl APIKey {
             account_id: account_info.id,
             account_name: account_info.name,
             world: account_info.world,
-            access: Access::from_strings(account_info.access),
+            access: account_info.access.into_iter().collect(),
         }
     }
 
@@ -181,8 +147,8 @@ impl APIKey {
     }
 
     /// Gets what content the account for this API key has access to.
-    pub fn access(&self) -> Access {
-        self.access
+    pub fn access(&self) -> std::collections::HashSet<String> {
+        self.access.clone()
     }
 }
 
@@ -218,23 +184,14 @@ mod test {
         assert_eq!("account_id", key.account_id());
         assert_eq!("account_name", key.account_name());
         assert_eq!("world", key.world());
-        assert_eq!(Access::FREE_TO_PLAY | Access::GUILDWARS2, key.access());
+        assert_eq!(2, key.access().len());
+        assert!(key.access().contains("PlayForFree"));
+        assert!(key.access().contains("GuildWars2"));
     }
 
     /// Unknown permissions get ignored.
     #[test]
     fn unknown_permission() {
         assert_eq!(Permission::empty(), Permission::from_string("123456"));
-    }
-
-
-    /// Unknown access gets ignored.
-    /// TODO: Should just keep a HashSet of accesses.  All uses just use
-    /// set intersection to test if an account can access content, no need
-    /// to have the bitflags, which just creates a maintenance burden on
-    /// expansion release.
-    #[test]
-    fn unknown_access() {
-        assert_eq!(Access::empty(), Access::from_string("123456"));
     }
 }
