@@ -182,4 +182,14 @@ mod test {
     fn unknown_permission() {
         assert_eq!(Permission::empty(), Permission::from_string("123456"));
     }
+
+    /// Tests APIKey creation that uses the API.
+    /// Depends on the environment variable API_KEY.
+    #[test]
+    #[ignore]
+    fn new() {
+        let key_string = option_env!("API_KEY").unwrap();
+        let key = APIKey::new(key_string).unwrap();
+        dbg!(key);
+    }
 }
