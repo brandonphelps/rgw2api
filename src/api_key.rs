@@ -16,8 +16,6 @@ pub struct APIKey {
     account_id: String,
     /// The account's name.  This can (very rarely) change.
     account_name: String,
-    /// The account's home server.
-    world: String,
     /// What content the account can access.
     access: std::collections::HashSet<String>,
 }
@@ -80,8 +78,6 @@ struct AccountInfo {
     id: String,
     /// Account name, can very rarely change.
     name: String,
-    /// The user's home server.
-    world: String,
     /// The user's access to content.
     /// What expansions they own and if they are free to play.
     access: Vec<String>,
@@ -111,7 +107,6 @@ impl APIKey {
             key_name: token_info.name,
             account_id: account_info.id,
             account_name: account_info.name,
-            world: account_info.world,
             access: account_info.access.into_iter().collect(),
         }
     }
@@ -141,11 +136,6 @@ impl APIKey {
         self.account_name.clone()
     }
 
-    /// Gets the account's home server.
-    pub fn world(&self) -> String {
-        self.world.clone()
-    }
-
     /// Gets what content the account for this API key has access to.
     pub fn access(&self) -> std::collections::HashSet<String> {
         self.access.clone()
@@ -172,7 +162,6 @@ mod test {
         let account_info = AccountInfo {
             id: "account_id".into(),
             name: "account_name".into(),
-            world: "world".into(),
             access: vec!["PlayForFree".into(), "GuildWars2".into()],
         };
         let key = APIKey::from_data(key_string, token_info, account_info);
@@ -183,7 +172,6 @@ mod test {
         assert_eq!("api_key_name", key.key_name());
         assert_eq!("account_id", key.account_id());
         assert_eq!("account_name", key.account_name());
-        assert_eq!("world", key.world());
         assert_eq!(2, key.access().len());
         assert!(key.access().contains("PlayForFree"));
         assert!(key.access().contains("GuildWars2"));
