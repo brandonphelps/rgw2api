@@ -1,10 +1,7 @@
-#![allow(dead_code)]
-
-use reqwest;
-
 use serde_derive::Deserialize;
 
 // these item structs should be namespaced into the v2 api.
+// todo: move all these types into some common space.
 #[derive(Deserialize, Debug)]
 struct ItemAttribute {
     attribute: String,
@@ -12,7 +9,20 @@ struct ItemAttribute {
 }
 
 #[derive(Deserialize, Debug)]
+struct ArmorDetails {}
+
+#[derive(Deserialize, Debug)]
+struct WeaponDetails {}
+
+#[derive(Deserialize, Debug)]
+enum ItemDetailsT {
+    Armor(ArmorDetails),
+    Weapon(WeaponDetails),
+}
+
+#[derive(Deserialize, Debug)]
 struct ItemDetails {
+    // todo: can't use type directly, what should this attribe be named?
     #[serde(rename = "type")]
     c_type: String,
     weight_class: String,
@@ -44,7 +54,7 @@ struct Item {
     restrictions: Vec<String>,
     chat_link: String,
     icon: String,
-    details: ItemDetails,
+    details: ItemDetailsT,
 }
 
 // should be usize?
@@ -59,86 +69,86 @@ pub struct AchievementId(pub u128);
 
 #[allow(non_camel_case_types)]
 pub enum EndPoint {
-    achievements(Option<AchievementId>),
-    achievements_daily,
-    achievements_daily_tomorrow,
-    account,
-    account_achievements,
-    account_bank,
-    account_materials,
-    account_dailycrafting,
-    account_dungeons,
-    account_dyes,
-    items(ItemId),
-    item_stats(Option<ItemId>),
+    Achievements(Option<AchievementId>),
+    AchievementsDaily,
+    AchievementsDailyTomorrow,
+    Account,
+    AccountAchievements,
+    AccountBank,
+    AccountMaterials,
+    AccountDailycrafting,
+    AccountDungeons,
+    AccountDyes,
+    Items(ItemId),
+    ItemStats(Option<ItemId>),
     // this is nothing to do with a specific item.
     // item stats supporst 3 end points/
     // base /itemstats
     // id   /itemstats/id
     // multiple(?) /itemstats?ids=23
-    item_stats_all(Option<ItemStatId>),
-    recipes(Option<RecipeId>),
-    build,
+    ItemStatsAll(Option<ItemStatId>),
+    Recipes(Option<RecipeId>),
+    Build,
 }
 
 impl EndPoint {
     pub fn requires_auth(self) -> bool {
         match self {
             // do require auth.
-            EndPoint::account => true,
-            EndPoint::account_achievements => true,
-            EndPoint::account_bank => true,
-            EndPoint::account_materials => true,
-            EndPoint::account_dailycrafting => true,
-            EndPoint::account_dungeons => true,
-            EndPoint::account_dyes => true,
+            EndPoint::Account => true,
+            EndPoint::AccountAchievements => true,
+            EndPoint::AccountBank => true,
+            EndPoint::AccountMaterials => true,
+            EndPoint::AccountDailycrafting => true,
+            EndPoint::AccountDungeons => true,
+            EndPoint::AccountDyes => true,
 
             // don't require auth
-            EndPoint::achievements(_) => false,
-            EndPoint::achievements_daily => false,
-            EndPoint::achievements_daily_tomorrow => false,
-            EndPoint::items(_) => false,
-            EndPoint::item_stats(_) => false,
-            EndPoint::item_stats_all(_) => false,
-            EndPoint::recipes(_) => false,
-            EndPoint::build => false,
+            EndPoint::Achievements(_) => false,
+            EndPoint::AchievementsDaily => false,
+            EndPoint::AchievementsDailyTomorrow => false,
+            EndPoint::Items(_) => false,
+            EndPoint::ItemStats(_) => false,
+            EndPoint::ItemStatsAll(_) => false,
+            EndPoint::Recipes(_) => false,
+            EndPoint::Build => false,
         }
     }
 
     pub fn uri(&self) -> String {
         match self {
-            EndPoint::account => format!("account"),
-            EndPoint::account_achievements => format!("account/achievements"),
-            EndPoint::account_dailycrafting => format!("account/dailycrafting"),
-            EndPoint::account_dungeons => format!("account/dungeons"),
-            EndPoint::account_dyes => format!("account/dyes"),
-            EndPoint::achievements(op_id) => match op_id {
+            EndPoint::Account => format!("account"),
+            EndPoint::AccountAchievements => format!("account/achievements"),
+            EndPoint::AccountDailycrafting => format!("account/dailycrafting"),
+            EndPoint::AccountDungeons => format!("account/dungeons"),
+            EndPoint::AccountDyes => format!("account/dyes"),
+            EndPoint::Achievements(op_id) => match op_id {
                 Some(id) => format!("achievements/{}", id.0.to_string()),
                 None => format!("achievements"),
             },
-            EndPoint::achievements_daily => "achievements/daily".to_string(),
-            EndPoint::achievements_daily_tomorrow => "achievements/daily/tomorrow".to_string(),
-            EndPoint::account_materials => "account/materials".to_string(),
-            EndPoint::account_bank => "account/bank".to_string(),
-            EndPoint::items(id) => format!("items/{}", id.0.to_string()),
-            EndPoint::item_stats(op_stats_id) => match op_stats_id {
+            EndPoint::AchievementsDaily => "achievements/daily".to_string(),
+            EndPoint::AchievementsDailyTomorrow => "achievements/daily/tomorrow".to_string(),
+            EndPoint::AccountMaterials => "account/materials".to_string(),
+            EndPoint::AccountBank => "account/bank".to_string(),
+            EndPoint::Items(id) => format!("items/{}", id.0.to_string()),
+            EndPoint::ItemStats(op_stats_id) => match op_stats_id {
                 Some(stats_id) => format!("itemstats/{}", stats_id.0.to_string()),
                 None => "itemstats".to_string(),
             },
-            EndPoint::item_stats_all(op_item_stat_id) => match op_item_stat_id {
+            EndPoint::ItemStatsAll(op_item_stat_id) => match op_item_stat_id {
                 Some(item_stat_id) => format!("itemstats/{}", item_stat_id.0.to_string()),
                 None => "itemstats".to_string(),
             },
-            EndPoint::recipes(op_recipe_id) => match op_recipe_id {
+            EndPoint::Recipes(op_recipe_id) => match op_recipe_id {
                 Some(recipe_id) => format!("recipes/{}", recipe_id.0.to_string()),
                 None => "recipes".to_string(),
             },
-            EndPoint::build => "build".to_string(),
+            EndPoint::Build => "build".to_string(),
         }
     }
 }
 
-// todo: likely should be renamed to EndPointBuilder? 
+// todo: likely should be renamed to EndPointBuilder?
 // can let something else do the requesting?
 pub struct Requester {
     version: ApiVersion,
@@ -171,32 +181,33 @@ impl Requester {
 mod test {
 
     use super::*;
+    use reqwest;
 
     #[test]
     fn test_item_construction() {
-        let p = EndPoint::items(ItemId(3));
+        let p = EndPoint::Items(ItemId(3));
         assert_eq!(p.uri(), "items/3");
-        let k = EndPoint::items(ItemId(1000));
+        let k = EndPoint::Items(ItemId(1000));
         assert_eq!(k.uri(), "items/1000");
     }
 
     #[test]
     fn test_uri_achivements() {
-        let p = EndPoint::achievements(None);
+        let p = EndPoint::Achievements(None);
         assert_eq!(p.uri(), "achievements");
     }
 
     #[test]
     fn test_uri_achivement_ids() {
-        let p = EndPoint::achievements(Some(AchievementId(32)));
+        let p = EndPoint::Achievements(Some(AchievementId(32)));
         assert_eq!(p.uri(), "achievements/32");
     }
 
     // need to wait till can combine specific end points.
     fn test_uri_achive_builder() {
         // https://wiki.guildwars2.com/wiki/API:2/achievements
-        let p = EndPoint::achievements(Some(AchievementId(32)));
-        let k = EndPoint::achievements(Some(AchievementId(40)));
+        let p = EndPoint::Achievements(Some(AchievementId(32)));
+        let k = EndPoint::Achievements(Some(AchievementId(40)));
 
         // would like to use the data refinement thing here to specify
         //  a specific varient of the EndPoint enum item at compile time.
@@ -204,8 +215,8 @@ mod test {
         // https://github.com/rust-lang/rfcs/issues/754
         // pretty certain order of ids in result do not matter.
         fn mock_builder(end_point1: &EndPoint, end_point2: &EndPoint) -> String {
-            let id_one = match end_point1 {
-                EndPoint::achievements(t) => match t {
+            let _id_one = match end_point1 {
+                EndPoint::Achievements(t) => match t {
                     Some(id) => id,
                     None => {
                         panic!("shouldn't get here")
@@ -215,8 +226,8 @@ mod test {
                     panic!("shouldn't get here")
                 }
             };
-            let id_two = match end_point2 {
-                EndPoint::achievements(t) => match t {
+            let _id_two = match end_point2 {
+                EndPoint::Achievements(t) => match t {
                     Some(id) => id,
                     None => {
                         panic!("shouldn't get here")
@@ -234,9 +245,15 @@ mod test {
     }
 
     #[test]
+    fn test_uri_account_achivements() {
+        let p = EndPoint::AccountAchievements;
+        assert_eq!(p.requires_auth(), true);
+    }
+
+    #[test]
     fn uri_building() {
         let r = Requester::new(ApiVersion(2), None);
-        let result = r.build_uri(&EndPoint::account_bank);
+        let result = r.build_uri(&EndPoint::AccountBank);
         assert_eq!(result, "https://api.guildwars2.com/v2/account/bank");
     }
 
@@ -245,7 +262,7 @@ mod test {
         let requester = Requester::new(ApiVersion(2), None);
 
         let r = reqwest::blocking::Client::new()
-            .get(&requester.build_uri(&EndPoint::items(ItemId(2000))))
+            .get(&requester.build_uri(&EndPoint::Items(ItemId(2000))))
             .send()
             .unwrap()
             .text()
@@ -253,7 +270,7 @@ mod test {
         println!("{}", r);
 
         let k: Item = reqwest::blocking::Client::new()
-            .get(&requester.build_uri(&EndPoint::items(ItemId(2000))))
+            .get(&requester.build_uri(&EndPoint::Items(ItemId(2000))))
             .send()
             .unwrap()
             .json()
