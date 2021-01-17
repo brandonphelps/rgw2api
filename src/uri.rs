@@ -138,6 +138,8 @@ impl EndPoint {
     }
 }
 
+// todo: likely should be renamed to EndPointBuilder? 
+// can let something else do the requesting?
 pub struct Requester {
     version: ApiVersion,
     api_key: Option<ApiKey>,
