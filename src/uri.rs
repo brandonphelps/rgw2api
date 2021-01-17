@@ -60,14 +60,16 @@ struct Item {
 // should be usize?
 
 // todo: move this to some types thing?
-pub struct ItemId(pub u128);
-pub struct ItemStatId(pub u128);
-pub struct RecipeId(pub u128);
+pub struct ItemId(pub u32);
+pub struct ItemStatId(pub u32);
+pub struct RecipeId(pub u32);
 pub struct ApiVersion(pub u8);
 pub struct ApiKey(pub String);
-pub struct AchievementId(pub u128);
+pub struct AchievementId(pub u32);
 
-#[allow(non_camel_case_types)]
+// List of end points that are accessible from the guild wars 2 api.
+// Each endpoint indicates if authentication is required to access the contents.
+// An endpoint looks like EndPoint::Items(None) which then maps to -> <base_url>/items
 pub enum EndPoint {
     Achievements(Option<AchievementId>),
     AchievementsDaily,
@@ -79,7 +81,7 @@ pub enum EndPoint {
     AccountDailycrafting,
     AccountDungeons,
     AccountDyes,
-    Items(ItemId),
+    Items(Option<ItemId>),
     ItemStats(Option<ItemId>),
     // this is nothing to do with a specific item.
     // item stats supporst 3 end points/
@@ -130,7 +132,12 @@ impl EndPoint {
             EndPoint::AchievementsDailyTomorrow => "achievements/daily/tomorrow".to_string(),
             EndPoint::AccountMaterials => "account/materials".to_string(),
             EndPoint::AccountBank => "account/bank".to_string(),
-            EndPoint::Items(id) => format!("items/{}", id.0.to_string()),
+            EndPoint::Items(op_id) => match op_id {
+                Some(id) => {
+                    format!("items/{}", id.0.to_string())
+                }
+                None => "items".to_string(),
+            },
             EndPoint::ItemStats(op_stats_id) => match op_stats_id {
                 Some(stats_id) => format!("itemstats/{}", stats_id.0.to_string()),
                 None => "itemstats".to_string(),
@@ -151,13 +158,14 @@ impl EndPoint {
 // todo: likely should be renamed to EndPointBuilder?
 // can let something else do the requesting?
 pub struct Requester {
+    // todo: the version here, would likely need to be apart of the endpoints since
+    // the uri and or other properties could change if version was modified.
     version: ApiVersion,
     api_key: Option<ApiKey>,
     base_uri: String,
 }
 
 impl Requester {
-    // todo: add in auth key as input parameter.
     pub fn new(version: ApiVersion, api_key: Option<ApiKey>) -> Requester {
         let mut uri_str = String::new();
         uri_str += "https://api.guildwars2.com/v";
@@ -185,10 +193,16 @@ mod test {
 
     #[test]
     fn test_item_construction() {
-        let p = EndPoint::Items(ItemId(3));
+        let p = EndPoint::Items(Some(ItemId(3)));
         assert_eq!(p.uri(), "items/3");
-        let k = EndPoint::Items(ItemId(1000));
+        let k = EndPoint::Items(Some(ItemId(1000)));
         assert_eq!(k.uri(), "items/1000");
+    }
+
+    #[test]
+    fn test_item_none() {
+        let p = EndPoint::Items(None);
+        assert_eq!(p.uri(), "items");
     }
 
     #[test]
@@ -262,15 +276,17 @@ mod test {
         let requester = Requester::new(ApiVersion(2), None);
 
         let r = reqwest::blocking::Client::new()
-            .get(&requester.build_uri(&EndPoint::Items(ItemId(2000))))
+            // todo: having to wrap each option item for the end point as Some is really cumbersome,
+            // kinda looks like lisp with all the functional parans.
+            .get(&requester.build_uri(&EndPoint::Items(Some(ItemId(2000)))))
             .send()
             .unwrap()
             .text()
             .unwrap();
         println!("{}", r);
 
-        let k: Item = reqwest::blocking::Client::new()
-            .get(&requester.build_uri(&EndPoint::Items(ItemId(2000))))
+        let _k: Item = reqwest::blocking::Client::new()
+            .get(&requester.build_uri(&EndPoint::Items(Some(ItemId(2000)))))
             .send()
             .unwrap()
             .json()
